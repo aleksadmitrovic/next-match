@@ -10,9 +10,11 @@ import { Avatar } from "@heroui/avatar";
 import { Session } from "next-auth";
 import Link from "next/link";
 import { signOutUser } from "@/app/actions/authActions";
+import { Member } from "@prisma/client";
+import { transformImageUrl } from "@/lib/util";
 
 type Props = {
-  user: Session["user"];
+  user?: Member | null;
 };
 
 export default function UserMenu({ user }: Props) {
@@ -26,7 +28,7 @@ export default function UserMenu({ user }: Props) {
           color="secondary"
           name={user?.name || "user avatar"}
           size="sm"
-          src={user?.image || "/images/user.png"}
+          src={transformImageUrl(user?.image) || "/images/user.png"}
         />
       </DropdownTrigger>
       <DropdownMenu variant="flat" aria-label="User actions menu">
