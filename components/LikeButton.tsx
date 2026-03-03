@@ -1,20 +1,21 @@
-"use client";
-import { toggleLikeMember } from "@/app/actions/likeActions";
-import { useRouter } from "next/navigation";
-import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+'use client';
+import { toggleLikeMember } from '@/app/actions/likeActions';
+import { useRouter } from 'next/navigation';
+import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 
-import React from "react";
+import React from 'react';
+import { Member } from '@prisma/client';
 
 type Props = {
-  targetId: string;
+  target: Member;
   hasLiked: boolean;
 };
 
-export default function LikeButton({ targetId, hasLiked }: Props) {
+export default function LikeButton({ target, hasLiked }: Props) {
   const router = useRouter();
 
   async function toggleLike() {
-    await toggleLikeMember(targetId, hasLiked);
+    await toggleLikeMember(target.userId, hasLiked);
     router.refresh();
   }
 
@@ -29,7 +30,7 @@ export default function LikeButton({ targetId, hasLiked }: Props) {
       />
       <AiFillHeart
         size={24}
-        className={hasLiked ? "fill-rose-500" : "fill-neutral-500/70"}
+        className={hasLiked ? 'fill-rose-500' : 'fill-neutral-500/70'}
       />
     </div>
   );

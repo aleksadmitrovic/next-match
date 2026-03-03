@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import { prisma } from "@/lib/prisma";
-import { getAuthUserId } from "./authActions";
+import { prisma } from '@/lib/prisma';
+import { getAuthUserId } from './authActions';
+import { pusherServer } from '@/lib/pusher';
 
 export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
   try {
     const userId = await getAuthUserId();
-
     if (isLiked) {
       await prisma.like.delete({
         where: {
@@ -17,12 +17,28 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
         },
       });
     } else {
-      await prisma.like.create({
+      const like = await prisma.like.create({
         data: {
           sourceUserId: userId,
           targetUserId,
         },
+        select: {
+          sourceMember: {
+            select: {
+              name: true,
+              image: true,
+              userId: true,
+            },
+          },
+        },
       });
+      const data = {
+        name: like.sourceMember.name,
+        image: like.sourceMember.image,
+        userId: like.sourceMember.userId,
+      };
+
+      await pusherServer.trigger(`private-${targetUserId}`, 'like:new', data);
     }
   } catch (error) {
     console.log(error);
@@ -50,16 +66,16 @@ export async function fetchCurrentUserLikeIds() {
   }
 }
 
-export async function fetchLikedMembers(type = "source") {
+export async function fetchLikedMembers(type = 'source') {
   try {
     const userId = await getAuthUserId();
 
     switch (type) {
-      case "source":
+      case 'source':
         return await fetchSourceLikes(userId);
-      case "target":
+      case 'target':
         return await fetchTargetLikes(userId);
-      case "mutual":
+      case 'mutual':
         return await fetchMutualLikes(userId);
       default:
         return [];

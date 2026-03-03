@@ -1,29 +1,31 @@
-"use client";
-import { Chip } from "@heroui/chip";
-import clsx from "clsx";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
-import { GoInbox } from "react-icons/go";
-import { MdOutlineOutbox } from "react-icons/md";
+'use client';
+import useMessageStore from '@/hooks/useMessageStore';
+import { Chip } from '@heroui/chip';
+import clsx from 'clsx';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from 'react';
+import { GoInbox } from 'react-icons/go';
+import { MdOutlineOutbox } from 'react-icons/md';
 
 export default function MessageSidebar() {
+  const unreadCount = useMessageStore((state) => state.unreadCount);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
   const [selected, setSelected] = useState<string>(
-    searchParams.get("container") || "inbox",
+    searchParams.get('container') || 'inbox',
   );
 
   const items = [
-    { key: "inbox", label: "Inbox", icon: GoInbox, chip: true },
-    { key: "outbox", label: "Outbox", icon: MdOutlineOutbox, chip: false },
+    { key: 'inbox', label: 'Inbox', icon: GoInbox, chip: true },
+    { key: 'outbox', label: 'Outbox', icon: MdOutlineOutbox, chip: false },
   ];
 
   function handleSelect(key: string) {
     setSelected(key);
     const params = new URLSearchParams();
-    params.set("container", key);
+    params.set('container', key);
     router.replace(`${pathname}?${params}`);
   }
 
@@ -32,9 +34,9 @@ export default function MessageSidebar() {
       {items.map(({ key, icon: Icon, label, chip }) => (
         <div
           key={key}
-          className={clsx("flex flex-row items-center rounded-t-lg gap-2 p-3", {
-            "text-secondary font-semibold": selected === key,
-            "text-black hover:text-secondary/70": selected !== key,
+          className={clsx('flex flex-row items-center rounded-t-lg gap-2 p-3', {
+            'text-secondary font-semibold': selected === key,
+            'text-black hover:text-secondary/70': selected !== key,
           })}
           onClick={() => {
             handleSelect(key);
@@ -43,7 +45,7 @@ export default function MessageSidebar() {
           <Icon size={24} />
           <div className="flex justify-between grow">
             <span>{label}</span>
-            {chip && <Chip>5</Chip>}
+            {chip && <Chip>{unreadCount}</Chip>}
           </div>
         </div>
       ))}
